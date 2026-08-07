@@ -1,0 +1,5 @@
+.venv
+*.gz
+*.lz4
+*.json.lz4
+data/DefaultObservationSpace-v1.json

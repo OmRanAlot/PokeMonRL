@@ -1,0 +1,14 @@
+[project]
+name = "bot"
+version = "0.1.0"
+description = "Pokemon Machine Learning Bot that gets better overtime!"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "huggingface-hub[hf-transfer]>=1.26.0",
+    "logging>=0.4.9.6",
+    "lz4>=4.4.5",
+    "matplotlib>=3.11.1",
+    "pandas>=3.0.5",
+    "scikit-learn>=1.9.0",
+]
