@@ -6,7 +6,6 @@ https://huggingface.co/datasets/jakegrigsby/metamon-parsed-replays
 
 """
 
-
 import pandas as pd
 import numpy as np
 from huggingface_hub import snapshot_download
