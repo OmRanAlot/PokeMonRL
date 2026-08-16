@@ -3,7 +3,6 @@ Download initial pre-enviroment data from
 
 https://huggingface.co/datasets/jakegrigsby/metamon-parsed-replays 
 
-
 """
 
 import pandas as pd

@@ -2,4 +2,5 @@
 *.gz
 *.lz4
 *.json.lz4
+*.tar
 data/DefaultObservationSpace-v1.json
