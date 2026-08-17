@@ -5,10 +5,11 @@ import json, lz4.frame
 import sys
 import torch
 import torch.nn as nn
+import torch.optim as optim
 
 class SharedEmbedding(nn.Module):
     #this is just for my understanding and this class is not technically needed!
-    def __init__(self, vocab_size=2540, embed_dim=5):
+    def __init__(self, vocab_size=2540, embed_dim=64):
         super().__init__()
 
         #embeddings are basically ways to represent non-numerical data as numbers
@@ -122,9 +123,11 @@ class BCPolicy(nn.Module):
         self.state_encoder = state_encoder
         self.action_dim = action_dim
         self.hidden_dim = hidden_dim
+        self.dropout = nn.Dropout(p=0.1) # dropout with probability of 0.1
         self.head = nn.Sequential(
             nn.Linear(state_encoder.output_dimensions, hidden_dim), # y = w^T * x + b
             nn.ReLU(), # max(x,0)
+            self.dropout, # dropout layer
             nn.Linear(hidden_dim, action_dim),
         )
 
@@ -149,6 +152,7 @@ class BCPolicy(nn.Module):
         state = self.state_encoder(field_feats, mine_active, mine_bench, opp_active, opp_revealed)
         logits = self.head(state)
         logits = logits.masked_fill(~action_mask, float("-inf")) #for any action that is illegal(switch to fainted mon, etc.)
+
         return logits
     
     

@@ -6,6 +6,8 @@ import webdataset as wds
 from pathlib import Path
 import os, sys
 import lz4.frame
+import os
+from tqdm import tqdm 
 
 class Vocab:
     """
@@ -336,9 +338,6 @@ class DataLoader():
         if not shard_path.is_absolute():
             shard_path = self.shard_dir / shard_path
         return "file:" + shard_path.resolve().as_posix()
-
-
-
 
 
 """
