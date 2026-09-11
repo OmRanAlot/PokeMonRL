@@ -9,10 +9,11 @@ import lz4.frame
 import os
 from tqdm import tqdm 
 from multiprocessing import Pool, cpu_count
+
 """
 Preprocess all of the data FIRST!
 Don't use tensors and convert at the end
-Do any sorts, 
+
 """
 
 class Vocab:
@@ -161,16 +162,50 @@ def collate_primitives_to_tensors(examples):
     Covert all at once to save on computation
     """
     def stack_group(key, is_list=False):
-        if is_list:
-            # For mine_bench and opp_revealed
+
+        if key == "field_feats":
             return {
-                field: torch.tensor([[ex[key][i][field] for i in range(len(ex[key]))] for ex in examples], dtype=torch.float32 if "numeric" in field else torch.long)
-                for field in examples[0][key][0]
+                "format_idx": torch.tensor([ex[key]["format_idx"] for ex in examples], dtype=torch.uint16),
+                "weather_idx": torch.tensor([ex[key]["weather_idx"] for ex in examples], dtype=torch.uint16),
+                "terrain_idx": torch.tensor([ex[key]["terrain_idx"] for ex in examples], dtype=torch.uint16),
+                "player_prev_move_idx": torch.tensor([ex[key]["player_prev_move_idx"] for ex in examples], dtype=torch.uint16),
+                "opp_prev_move_idx": torch.tensor([ex[key]["opp_prev_move_idx"] for ex in examples], dtype=torch.uint16),
+                "hazards": torch.tensor([ex[key]["hazards"] for ex in examples], dtype=torch.bool), # 0.0 or 1.0 translates perfectly to bool
+                "scalars": torch.tensor([ex[key]["scalars"] for ex in examples], dtype=torch.float16), 
             }
-        return {
-            field: torch.tensor([ex[key][field] for ex in examples], dtype=torch.float32 if "numeric" in field or field in ["hazards", "scalars"] else torch.long)
-            for field in examples[0][key]
-        }
+
+        # Pokemon dictionaries 
+        categorical_fields = [
+                "species_idx", "item_idx", "ability_idx", "status_idx", 
+                "tera_idx", "type_idxs", "move_idxs"
+            ]
+
+        stacked = {}
+
+        if is_list:
+            # gets all the information into the dictionary for BENCHED mons
+            for field in categorical_fields:
+                stacked[field] = torch.tensor([[ex[key][i][field] for i in range(len(ex[key]))] for ex in examples], dtype=torch.uint16)
+
+
+            stacked["hp_pct"] = torch.tensor([[ex[key][i]["numeric_feats"][0] for i in range(len(ex[key]))] for ex in examples], dtype=torch.float16)
+            stacked["boosts"] = torch.tensor([[ex[key][i]["numeric_feats"][1:8] for i in range(len(ex[key]))] for ex in examples], dtype=torch.int8)
+            stacked["base_stats"] = torch.tensor([[ex[key][i]["numeric_feats"][8:14] for i in range(len(ex[key]))] for ex in examples], dtype=torch.uint8)
+            stacked["move_pp"] = torch.tensor([[ex[key][i]["numeric_feats"][14:18] for i in range(len(ex[key]))] for ex in examples], dtype=torch.float16)
+        
+        else:
+            # active mons
+            for field in categorical_fields:
+                stacked[field] = torch.tensor([ex[key][field] for ex in examples], dtype=torch.uint16)
+                
+            stacked["hp_pct"] = torch.tensor([ex[key]["numeric_feats"][0] for ex in examples], dtype=torch.float16)
+            stacked["boosts"] = torch.tensor([ex[key]["numeric_feats"][1:8] for ex in examples], dtype=torch.int8)
+            stacked["base_stats"] = torch.tensor([ex[key]["numeric_feats"][8:14] for ex in examples], dtype=torch.uint8)
+            stacked["move_pp"] = torch.tensor([ex[key]["numeric_feats"][14:18] for ex in examples], dtype=torch.float16)
+
+        return stacked
+
+
 
     return {
         "field_feats": stack_group("field_feats"),
@@ -179,7 +214,7 @@ def collate_primitives_to_tensors(examples):
         "opp_active": stack_group("opp_active"),
         "opp_revealed": stack_group("opp_revealed", is_list=True),
         "action_mask": torch.tensor([ex["action_mask"] for ex in examples], dtype=torch.bool),
-        "action_label": torch.tensor([ex["action_label"] for ex in examples], dtype=torch.long),
+        "action_label": torch.tensor([ex["action_label"] for ex in examples], dtype=torch.int8),
     }
 
 def _to_shard_url(path):

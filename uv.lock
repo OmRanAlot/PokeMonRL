@@ -34,6 +34,7 @@ dependencies = [
     { name = "multithreading" },
     { name = "pandas" },
     { name = "scikit-learn" },
+    { name = "tqdm" },
     { name = "webdataset" },
 ]
 
@@ -46,6 +47,7 @@ requires-dist = [
     { name = "multithreading", specifier = ">=0.2.0" },
     { name = "pandas", specifier = ">=3.0.5" },
     { name = "scikit-learn", specifier = ">=1.9.0" },
+    { name = "tqdm", specifier = ">=4.70.0" },
     { name = "webdataset", specifier = ">=1.0.2" },
 ]
 

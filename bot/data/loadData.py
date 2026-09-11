@@ -18,7 +18,6 @@ class Vocab:
     """
 
     def __init__(self, path="C:\\Users\\omran\\code\\PokemonRL\\data\\DefaultObservationSpace-v1.json"):
-        
         current_dir = os.path.dirname(os.path.abspath(__file__))
         root_dir = os.path.abspath(os.path.join(current_dir, '../../'))
         print(root_dir)
